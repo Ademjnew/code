@@ -1,54 +1,27 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import React, { Component } from 'react';
+import { Switch, Route } from 'react-router-dom'
+import requireAuthentication from './utils/requireAuth'
+import Home from './features/Home/container'
+import Locations from './features/Locations/container'
+import Login from './features/Login/container'
+import Register from './features/Register/container'
+import Header from './layouts/Header'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-// Components
-import { Nav } from './components/Nav';
-import { AddMovie } from './components/Movies/AddMovie';
-import { EditMovie } from './components/Movies/EditMovie';
-
-import {MoviesList } from './components/Movies/MoviesList';
-import { Error404 } from './components/Error404';
-import {UserMovies} from "./components/Movies/UserMovies"
-
-export default class App extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-        }
-    }
-
-
-
-    // Switch goes to first matching route
-    render () {
-        return (
-            <div className="app">                
-                <Router>
-                    <div className="route-container">
-                        <Nav />
-                        <Switch>
-                             <Route exact path="/" render={(props) => (
-                                <UserMovies
-                                />
-                            )} />
-
-                            <Route path="/list" render={(props) => (
-                                <MoviesList
-                                />
-                            )} />
-                            <Route path="/add" render={(props) => (
-                                <AddMovie
-                                />
-                            )} />
-                            <Route path="/edit/:id" render={(props) => (
-                                <EditMovie {...props}
-                                />
-                            )} />
-                            <Route component={Error404} />
-                        </Switch>
-                    </div>                    
-                </Router>                
-            </div>
-        )
-    }
+class App extends Component {
+  render() {
+    return (
+      <div>
+          <Header/>
+          <Switch>
+              <Route  path="/locations" component={requireAuthentication(Locations,false)} />
+              <Route  path="/login" component={Login} />
+              <Route  path="/register" component={Register} />
+              <Route path="/" component={requireAuthentication(Home,false)} />
+          </Switch>
+      </div>
+    );
+  }
 }
+
+export default App;

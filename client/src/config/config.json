@@ -1,0 +1,11 @@
+{
+  "development": {
+    "api": "http://localhost:4001/"
+  },
+  "test": {
+    "api": "http://localhost:4001/"
+  },
+  "production": {
+    "api": "http://localhost:4001/"
+  }
+}

@@ -1,65 +1,46 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
-const Schema = mongoose.Schema ; 
+const { Schema } = mongoose;
 
-//
+const UsersSchema = new Schema({
+    email: String,
+    username: String,
+    hash: String,
+    salt: String,
+});
 
-const addressSchema = new Schema({
-    street: {
-        type: String
-    }, 
-    suite: {
-        type: String
-    }, 
-    city: {
-        type: String
-    },
-    zipcode: {
-        type: String
-    },
-    geo: {
-        lat: String,
-        lng: String
-    }
+UsersSchema.methods.setPassword = function(password) {
+    this.salt = crypto.randomBytes(16).toString('hex');
+    this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
+};
 
-}, {
-    _id: false
-    });
+UsersSchema.methods.validatePassword = function(password) {
+    const hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
+    return this.hash === hash;
+};
 
-const UserSchema = new Schema({
-    _id: {
-        type: Number, 
-        required: [true,"Id Field is required"]
-    },
-    name: {
-        type: String
-    },
-    username: {
-        type: String
-    },
-    email: {
-        type: String
-    },
-    
-    
-    website: {
-        type: String
-    },
-    company: {
-        name: String,
-        catchPhrase: String,
-        bs: String
+UsersSchema.methods.generateJWT = function() {
+    const today = new Date();
+    const expirationDate = new Date(today);
+    expirationDate.setDate(today.getDate() + 60);
 
-    }
-},{ versionKey: false });
+    return jwt.sign({
+        email: this.email,
+        username: this.username,
+        id: this._id,
+        exp: parseInt(expirationDate.getTime() / 1000, 10),
+    }, 'secret');
+}
 
-UserSchema.set('toJSON', {
-    transform: function (doc, ret, options) {
-        ret.id = ret._id;
-        delete ret._id;
-    }
-}); 
+UsersSchema.methods.toAuthJSON = function() {
+    return {
+        _id: this._id,
+        email: this.email,
+        username: this.username,
+        token: this.generateJWT(),
+    };
+};
 
-const user = mongoose.model("user", UserSchema);
-
-module.exports = user; 
+mongoose.model('Users', UsersSchema);
