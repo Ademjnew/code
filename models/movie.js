@@ -13,13 +13,22 @@ const MovieSchema = new Schema({
         type: Number, 
         required: [true,"Id Field is required"]
     },
-    title: {
+    name: {
         type: String
     },
-    body: {
-        type: String, 
-        default: "just a default value to test default property in Schema"
-    }
+    releaseDate: {
+        type: Date, 
+        default: new Date()
+    },
+
+    duration: {
+        type:Number
+    },
+    actors: { type : Array , "default" : [] },
+
+    ratings:  { type : Array , "default" : [] },
+    commentatorsID :  { type : Array , "default" : [] } 
+
 }, { versionKey: false });
 
 MovieSchema.method('toClient', function(p) {
